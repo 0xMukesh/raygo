@@ -23,7 +23,8 @@ func main() {
 	pixelDeltaU := viewportU.DivideScalar(float64(imageWidth))
 	pixelDeltaV := viewportV.DivideScalar(float64(imageHeight))
 
-	viewportUpperLeft := cameraCentre.SubtractVector(pkg.NewVector(0, 0, focalLength)).SubtractVector(viewportU.DivideScalar(2)).SubtractVector(viewportV.DivideScalar(2))
+	focalLengtVector := pkg.NewVector(0, 0, focalLength)
+	viewportUpperLeft := focalLengtVector.SubtractVector(cameraCentre).SubtractVector(viewportU.DivideScalar(2)).SubtractVector(viewportV.DivideScalar(2))
 	pixel00Loc := viewportUpperLeft.AddVector(pixelDeltaU.DivideScalar(2)).AddVector(pixelDeltaV.DivideScalar(2))
 
 	f, err := os.Create("test.ppm")
