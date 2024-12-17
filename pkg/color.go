@@ -5,10 +5,22 @@ import (
 	"os"
 )
 
-func WriteColor(file *os.File, pixel Vector) error {
-	r := pixel.X
-	g := pixel.Y
-	b := pixel.Z
+type Color struct {
+	R, G, B float64
+}
+
+func NewColor(r, g, b float64) Color {
+	return Color{
+		R: r,
+		G: g,
+		B: b,
+	}
+}
+
+func WriteColor(file *os.File, color Color) error {
+	r := color.R
+	g := color.G
+	b := color.B
 
 	ir := int(255.999 * r)
 	ig := int(255.999 * g)

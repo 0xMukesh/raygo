@@ -14,8 +14,16 @@ func NewVector(x, y, z float64) Vector {
 	}
 }
 
-type Point = Vector
-type Color = Vector
+func (v Vector) ToColor() Color {
+	return Color{
+		R: v.X,
+		G: v.Y,
+		B: v.Z,
+	}
+}
+
+// type Point = Vector
+// type Color = Vector
 
 func (v Vector) AddVector(u Vector) Vector {
 	return Vector{v.X + u.X, v.Y + u.Y, v.Z + u.Z}

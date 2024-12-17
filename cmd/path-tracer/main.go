@@ -9,7 +9,7 @@ import (
 
 func main() {
 	imageWidth := 400
-	aspectRatio := float64(16 / 9)
+	aspectRatio := 16.0 / 9.0
 	imageHeight := int(float64(imageWidth) / aspectRatio)
 
 	focalLength := 1.0
