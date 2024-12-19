@@ -2,30 +2,18 @@ package main
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"os"
 
 	"github.com/0xmukesh/path-tracer/pkg"
 )
 
 func main() {
-	imageWidth := 400
 	aspectRatio := 16.0 / 9.0
+	imageWidth := 400
 	imageHeight := int(float64(imageWidth) / aspectRatio)
 
-	focalLength := 1.0
-	viewportHeight := 2.0
-	viewportWidth := viewportHeight * (float64(imageWidth) / float64(imageHeight))
-	cameraCentre := pkg.NewVector(0, 0, 0)
-
-	viewportU := pkg.NewVector(viewportWidth, 0, 0)
-	viewportV := pkg.NewVector(0, -viewportHeight, 0)
-
-	pixelDeltaU := viewportU.DivideScalar(float64(imageWidth))
-	pixelDeltaV := viewportV.DivideScalar(float64(imageHeight))
-
-	focalLengtVector := pkg.NewVector(0, 0, focalLength)
-	viewportUpperLeft := focalLengtVector.SubtractVector(cameraCentre).SubtractVector(viewportU.DivideScalar(2)).SubtractVector(viewportV.DivideScalar(2))
-	pixel00Loc := viewportUpperLeft.AddVector(pixelDeltaU.DivideScalar(2)).AddVector(pixelDeltaV.DivideScalar(2))
+	camera := pkg.NewCamera(aspectRatio)
 
 	f, err := os.Create("test.ppm")
 	if err != nil {
@@ -37,16 +25,26 @@ func main() {
 		panic(err.Error())
 	}
 
-	for j := 0; j < imageHeight; j++ {
-		fmt.Printf("scanlines remaining: %d\n", imageHeight-j)
-		for i := 0; i < imageWidth; i++ {
-			pixelCentre := pixel00Loc.AddVector(pixelDeltaU.MultiplyScalar(float64(i))).AddVector(pixelDeltaV.MultiplyScalar(float64(j)))
-			rayDirection := pixelCentre.SubtractVector(cameraCentre)
+	ns := 10
 
-			ray := pkg.NewRay(cameraCentre, rayDirection)
-			pixelColor := pkg.RayColor(ray)
+	for j := imageHeight; j >= 0; j-- {
+		fmt.Printf("scanlines remaining: %d\n", j)
 
-			if err := pkg.WriteColor(f, pixelColor); err != nil {
+		for i := 0; i < int(imageWidth); i++ {
+			rgb := pkg.Vector{}
+
+			for s := 0; s < ns; s++ {
+				u := (float64(i) + rand.Float64()) / float64(imageWidth)
+				v := (float64(j) + rand.Float64()) / float64(imageHeight)
+
+				ray := camera.RayAt(u, v)
+				color := ray.RayColor()
+				rgb = rgb.AddVector(color.ToVector())
+			}
+
+			rgb = rgb.DivideScalar(float64(ns))
+
+			if err := pkg.WriteColor(f, rgb.ToColor()); err != nil {
 				panic(err.Error())
 			}
 		}

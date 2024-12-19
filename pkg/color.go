@@ -17,14 +17,18 @@ func NewColor(r, g, b float64) Color {
 	}
 }
 
+func (c Color) ToVector() Vector {
+	return NewVector(c.R, c.G, c.B)
+}
+
 func WriteColor(file *os.File, color Color) error {
 	r := color.R
 	g := color.G
 	b := color.B
 
-	ir := int(255.999 * r)
-	ig := int(255.999 * g)
-	ib := int(255.999 * b)
+	ir := int(255.99 * r)
+	ig := int(255.99 * g)
+	ib := int(255.99 * b)
 
 	_, err := fmt.Fprintf(file, "%d %d %d\n", ir, ig, ib)
 	return err

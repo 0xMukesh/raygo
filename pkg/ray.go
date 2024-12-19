@@ -1,8 +1,6 @@
 package pkg
 
-import (
-	"math"
-)
+import "math"
 
 type Ray struct {
 	Origin, Direction Vector
@@ -19,34 +17,27 @@ func (r Ray) At(t float64) Vector {
 	return r.Origin.AddVector(r.Direction.MultiplyScalar(t))
 }
 
-func (r Ray) HitsSphere(centre Vector, radius float64) (bool, float64) {
-	oc := centre.SubtractVector(r.Origin)
+func (r Ray) RayColor() Color {
+	sphereCentre := NewVector(0, 0, -1)
+	sphereRadius := 0.5
+	floorCentre := NewVector(0, -100.5, -1)
+	floorRadius := 100.0
 
-	a := r.Direction.DotProduct(r.Direction)
-	b := -2 * r.Direction.DotProduct(oc)
-	c := oc.DotProduct(oc) - math.Pow(radius, 2)
+	white := NewColor(1, 1, 1).ToVector()
+	blue := NewColor(0.5, 0.7, 1).ToVector()
 
-	discriminant := math.Pow(b, 2) - 4*a*c
+	sphere := NewSphere(sphereCentre, sphereRadius)
+	floor := NewSphere(floorCentre, floorRadius)
 
-	if discriminant >= 0 {
-		return true, (-b - math.Sqrt(discriminant)) / (2 * a)
-	} else {
-		return false, 0
-	}
-}
+	scene := Scene{[]Hittable{&sphere, &floor}}
 
-func RayColor(r Ray) Color {
-	centre := NewVector(0, 0, -1)
-	radius := 0.5
-
-	found, t := r.HitsSphere(centre, radius)
+	found, rec := scene.Hit(r, 0, math.MaxFloat64)
 	if found {
-		normal := (r.At(t).SubtractVector(centre)).DivideScalar(radius)
-		return NewVector(normal.X+1, normal.Y+1, normal.Z+1).MultiplyScalar(0.5).ToColor()
+		return rec.N.AddScalar(1).MultiplyScalar(0.5).ToColor()
 	}
 
 	unitVector := r.Direction.UnitVector()
 	a := (1 + unitVector.Y) * 0.5
-	// lerp - (1 - a) * (start value) + (a) * (end value)
-	return NewVector(1, 1, 1).MultiplyScalar(1 - a).AddVector(NewVector(0.5, 0.7, 1).MultiplyScalar(a)).ToColor()
+	// linear blend: blended_value = ((1 - a) * (start_value)) + (a * end_value)
+	return white.MultiplyScalar(1 - a).AddVector(blue.MultiplyScalar(a)).ToColor()
 }

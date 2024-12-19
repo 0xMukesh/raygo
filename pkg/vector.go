@@ -15,18 +15,15 @@ func NewVector(x, y, z float64) Vector {
 }
 
 func (v Vector) ToColor() Color {
-	return Color{
-		R: v.X,
-		G: v.Y,
-		B: v.Z,
-	}
+	return NewColor(v.X, v.Y, v.Z)
 }
-
-// type Point = Vector
-// type Color = Vector
 
 func (v Vector) AddVector(u Vector) Vector {
 	return Vector{v.X + u.X, v.Y + u.Y, v.Z + u.Z}
+}
+
+func (v Vector) AddScalar(s float64) Vector {
+	return Vector{v.X + s, v.Y + s, v.Z + s}
 }
 
 func (v Vector) SubtractVector(u Vector) Vector {
