@@ -1,6 +1,8 @@
 package pkg
 
-import "math"
+import (
+	"math"
+)
 
 type Vector struct {
 	X, Y, Z float64

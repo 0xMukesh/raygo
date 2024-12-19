@@ -1,10 +1,16 @@
 package pkg
 
-import "math"
+import (
+	"fmt"
+	"math"
+	"math/rand/v2"
+	"os"
+)
 
 type Camera struct {
 	LowerLeft, Origin, Horizontal, Vertical    Vector
 	FocalLength, ViewportHeight, ViewportWidth float64
+	MaxDepth                                   int
 }
 
 func NewCamera(aspectRatio float64) *Camera {
@@ -13,6 +19,7 @@ func NewCamera(aspectRatio float64) *Camera {
 	c.FocalLength = 1.0
 	c.ViewportHeight = 2.0
 	c.ViewportWidth = c.ViewportHeight * aspectRatio
+	c.MaxDepth = 50
 
 	c.LowerLeft = NewVector(-c.ViewportWidth/2.0, -c.ViewportHeight/2, -c.FocalLength)
 	c.Horizontal = NewVector(c.ViewportWidth, 0, 0)
@@ -23,30 +30,54 @@ func NewCamera(aspectRatio float64) *Camera {
 }
 
 func (c *Camera) RayAt(u, v float64) Ray {
-	position := c.position(u, v)
-	direction := c.direction(position)
+	horizontal := c.Horizontal.MultiplyScalar(u)
+	vertical := c.Vertical.MultiplyScalar(v)
+	position := horizontal.AddVector(vertical)
+	direction := c.LowerLeft.AddVector(position)
 
 	return Ray{c.Origin, direction}
 }
 
-func (c *Camera) position(u, v float64) Vector {
-	horizontal := c.Horizontal.MultiplyScalar(u)
-	vertical := c.Vertical.MultiplyScalar(v)
+func (c *Camera) Render(scene Scene, imageHeight, imageWidth, numberOfSamples int, f *os.File) {
+	for j := imageHeight; j >= 0; j-- {
+		fmt.Printf("scanlines remaining: %d\n", j)
 
-	return horizontal.AddVector(vertical)
+		for i := 0; i < int(imageWidth); i++ {
+			rgb := Vector{}
+
+			for s := 0; s < numberOfSamples; s++ {
+				u := (float64(i) + rand.Float64()) / float64(imageWidth)
+				v := (float64(j) + rand.Float64()) / float64(imageHeight)
+
+				ray := c.RayAt(u, v)
+				color := c.RayColor(ray, scene, c.MaxDepth)
+				rgb = rgb.AddVector(color.ToVector())
+			}
+
+			rgb = rgb.DivideScalar(float64(numberOfSamples))
+
+			if err := WriteColor(f, rgb.ToColor()); err != nil {
+				panic(err.Error())
+			}
+		}
+	}
+
+	fmt.Println("done")
 }
 
-func (c *Camera) direction(position Vector) Vector {
-	return c.LowerLeft.AddVector(position)
-}
+func (c *Camera) RayColor(r Ray, h Hittable, depth int) Color {
+	if depth <= 0 {
+		return NewColor(0, 0, 0)
+	}
 
-func (c *Camera) RayColor(r Ray, h Hittable) Color {
 	white := NewColor(1, 1, 1).ToVector()
 	blue := NewColor(0.5, 0.7, 1).ToVector()
 
-	found, rec := h.Hit(r, 0, math.MaxFloat64)
+	found, rec := h.Hit(r, 0.0001, math.MaxFloat64)
 	if found {
-		return rec.N.AddScalar(1).MultiplyScalar(0.5).ToColor()
+		diffusedRayDirection := RandomOnHemisphere(rec.N)
+		diffusedRay := NewRay(rec.P, diffusedRayDirection)
+		return c.RayColor(diffusedRay, h, depth-1).ToVector().MultiplyScalar(0.5).ToColor()
 	}
 
 	unitVector := r.Direction.UnitVector()

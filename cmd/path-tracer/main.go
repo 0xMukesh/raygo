@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand/v2"
 	"os"
 
 	"github.com/0xmukesh/path-tracer/pkg"
@@ -25,30 +24,11 @@ func main() {
 		panic(err.Error())
 	}
 
-	ns := 10
+	ns := 100
 
-	for j := imageHeight; j >= 0; j-- {
-		fmt.Printf("scanlines remaining: %d\n", j)
+	sphere := pkg.NewSphere(pkg.NewVector(0, 0, -1), 0.5)
+	floor := pkg.NewSphere(pkg.NewVector(0, -100.5, -1), 100)
+	scene := pkg.Scene{Elements: []pkg.Hittable{&sphere, &floor}}
 
-		for i := 0; i < int(imageWidth); i++ {
-			rgb := pkg.Vector{}
-
-			for s := 0; s < ns; s++ {
-				u := (float64(i) + rand.Float64()) / float64(imageWidth)
-				v := (float64(j) + rand.Float64()) / float64(imageHeight)
-
-				ray := camera.RayAt(u, v)
-				color := ray.RayColor()
-				rgb = rgb.AddVector(color.ToVector())
-			}
-
-			rgb = rgb.DivideScalar(float64(ns))
-
-			if err := pkg.WriteColor(f, rgb.ToColor()); err != nil {
-				panic(err.Error())
-			}
-		}
-	}
-
-	fmt.Println("done")
+	camera.Render(scene, imageHeight, imageWidth, ns, f)
 }
