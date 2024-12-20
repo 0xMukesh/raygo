@@ -22,9 +22,9 @@ func (c Color) ToVector() Vector {
 }
 
 func WriteColor(file *os.File, color Color) error {
-	r := color.R
-	g := color.G
-	b := color.B
+	r := LinearToGamma(color.R)
+	g := LinearToGamma(color.G)
+	b := LinearToGamma(color.B)
 
 	ir := int(255.99 * r)
 	ig := int(255.99 * g)

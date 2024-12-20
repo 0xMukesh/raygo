@@ -73,11 +73,14 @@ func (c *Camera) RayColor(r Ray, h Hittable, depth int) Color {
 	white := NewColor(1, 1, 1).ToVector()
 	blue := NewColor(0.5, 0.7, 1).ToVector()
 
+	// using 0.0001 as the initial value instead of 0 to avoid shadow acne caused due to floating number rounding issues
 	found, rec := h.Hit(r, 0.0001, math.MaxFloat64)
 	if found {
-		diffusedRayDirection := RandomOnHemisphere(rec.N)
-		diffusedRay := NewRay(rec.P, diffusedRayDirection)
-		return c.RayColor(diffusedRay, h, depth-1).ToVector().MultiplyScalar(0.5).ToColor()
+		found, ray := rec.Scatter(r, rec)
+		if found {
+			newColor := c.RayColor(ray, h, depth-1).ToVector()
+			return rec.Material.Color().MultiplyComponents(newColor).ToColor()
+		}
 	}
 
 	unitVector := r.Direction.UnitVector()

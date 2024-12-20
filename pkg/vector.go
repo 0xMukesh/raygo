@@ -48,6 +48,10 @@ func (v Vector) DotProduct(u Vector) float64 {
 	return (v.X * u.X) + (v.Y * u.Y) + (v.Z * u.Z)
 }
 
+func (v Vector) MultiplyComponents(u Vector) Vector {
+	return NewVector(v.X*u.X, v.Y*u.Y, v.Z*u.Z)
+}
+
 func (v Vector) CrossProduct(u Vector) Vector {
 	x := (v.Y * u.Z) - (v.Z * u.Y)
 	y := -((v.X * u.Z) - (v.Z * u.X))

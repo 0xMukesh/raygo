@@ -35,3 +35,11 @@ func RandomOnHemisphere(normal Vector) Vector {
 		return onUnitSphere.MultiplyScalar(-1)
 	}
 }
+
+func LinearToGamma(linear float64) float64 {
+	if linear > 0 {
+		return math.Sqrt(linear)
+	} else {
+		return 0
+	}
+}

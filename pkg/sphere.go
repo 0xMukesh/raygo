@@ -7,12 +7,14 @@ import (
 type Sphere struct {
 	Centre Vector
 	Radius float64
+	Material
 }
 
-func NewSphere(centre Vector, radius float64) Sphere {
+func NewSphere(centre Vector, radius float64, material Material) Sphere {
 	return Sphere{
-		Centre: centre,
-		Radius: radius,
+		Centre:   centre,
+		Radius:   radius,
+		Material: material,
 	}
 }
 
@@ -25,7 +27,7 @@ func (s Sphere) Hit(r Ray, tMin float64, tMax float64) (bool, *HitRecord) {
 
 	discriminant := b*b - 4*a*c
 
-	hitRecord := &HitRecord{}
+	hitRecord := &HitRecord{Material: s.Material}
 
 	if discriminant >= 0 {
 		t := (-b - math.Sqrt(discriminant)) / (2 * a)
