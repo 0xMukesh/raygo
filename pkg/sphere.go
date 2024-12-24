@@ -35,7 +35,7 @@ func (s Sphere) Hit(r Ray, tMin float64, tMax float64) (bool, *HitRecord) {
 		if tMin <= t && tMax >= t {
 			hitRecord.T = t
 			hitRecord.P = r.At(t)
-			hitRecord.N = r.At(t).SubtractVector(s.Centre).DivideScalar(s.Radius)
+			hitRecord.N = hitRecord.P.SubtractVector(s.Centre).DivideScalar(s.Radius)
 			return true, hitRecord
 		}
 
@@ -44,7 +44,7 @@ func (s Sphere) Hit(r Ray, tMin float64, tMax float64) (bool, *HitRecord) {
 		if tMin <= t && tMax >= t {
 			hitRecord.T = t
 			hitRecord.P = r.At(t)
-			hitRecord.N = r.At(t).SubtractVector(s.Centre).DivideScalar(s.Radius)
+			hitRecord.N = hitRecord.P.SubtractVector(s.Centre).DivideScalar(s.Radius)
 			return true, hitRecord
 		}
 	}

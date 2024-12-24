@@ -71,3 +71,21 @@ func (v Vector) Length() float64 {
 func (v Vector) UnitVector() Vector {
 	return v.DivideScalar(v.Length())
 }
+
+func (v Vector) Reflect(n Vector) Vector {
+	b := 2 * v.DotProduct(n)
+	return v.SubtractVector(n.MultiplyScalar(b))
+}
+
+func (v Vector) Refract(o Vector, n float64) (bool, Vector) {
+	uv := v.UnitVector()
+	uo := o.UnitVector()
+	dt := uv.DotProduct(uo)
+	discriminant := 1.0 - (n * n * (1 - dt*dt))
+	if discriminant > 0 {
+		a := uv.SubtractVector(o.MultiplyScalar(dt)).MultiplyScalar(n)
+		b := o.MultiplyScalar(math.Sqrt(discriminant))
+		return true, a.SubtractVector(b)
+	}
+	return false, Vector{}
+}

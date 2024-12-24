@@ -41,7 +41,6 @@ func (c *Camera) RayAt(u, v float64) Ray {
 func (c *Camera) Render(scene Scene, imageHeight, imageWidth, numberOfSamples int, f *os.File) {
 	for j := imageHeight; j >= 0; j-- {
 		fmt.Printf("scanlines remaining: %d\n", j)
-
 		for i := 0; i < int(imageWidth); i++ {
 			rgb := Vector{}
 
@@ -50,7 +49,7 @@ func (c *Camera) Render(scene Scene, imageHeight, imageWidth, numberOfSamples in
 				v := (float64(j) + rand.Float64()) / float64(imageHeight)
 
 				ray := c.RayAt(u, v)
-				color := c.RayColor(ray, scene, c.MaxDepth)
+				color := c.RayColor(ray, scene, 0)
 				rgb = rgb.AddVector(color.ToVector())
 			}
 
@@ -66,7 +65,7 @@ func (c *Camera) Render(scene Scene, imageHeight, imageWidth, numberOfSamples in
 }
 
 func (c *Camera) RayColor(r Ray, h Hittable, depth int) Color {
-	if depth <= 0 {
+	if depth >= c.MaxDepth {
 		return NewColor(0, 0, 0)
 	}
 
@@ -78,8 +77,8 @@ func (c *Camera) RayColor(r Ray, h Hittable, depth int) Color {
 	if found {
 		found, ray := rec.Scatter(r, rec)
 		if found {
-			newColor := c.RayColor(ray, h, depth-1).ToVector()
-			return rec.Material.Color().MultiplyComponents(newColor).ToColor()
+			newColor := c.RayColor(ray, h, depth+1).ToVector()
+			return rec.Material.Color().ToVector().MultiplyComponents(newColor).ToColor()
 		}
 	}
 
