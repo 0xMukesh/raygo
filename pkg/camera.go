@@ -13,18 +13,29 @@ type Camera struct {
 	MaxDepth                                   int
 }
 
-func NewCamera(aspectRatio float64) *Camera {
+func NewCamera(lookFrom, lookAt, vUp Vector, vfov, aspectRatio float64) *Camera {
 	c := new(Camera)
 
-	c.FocalLength = 1.0
-	c.ViewportHeight = 2.0
-	c.ViewportWidth = c.ViewportHeight * aspectRatio
+	c.Origin = lookFrom
 	c.MaxDepth = 50
+	c.FocalLength = lookFrom.SubtractVector(lookAt).Length()
 
-	c.LowerLeft = NewVector(-c.ViewportWidth/2.0, -c.ViewportHeight/2, -c.FocalLength)
-	c.Horizontal = NewVector(c.ViewportWidth, 0, 0)
-	c.Vertical = NewVector(0, c.ViewportHeight, 0)
-	c.Origin = NewVector(0.0, 0.0, 0.0)
+	theta := vfov * math.Pi / 180
+	h := math.Tan(theta / 2)
+
+	c.ViewportHeight = 2 * h * c.FocalLength
+	c.ViewportWidth = aspectRatio * c.ViewportHeight
+
+	w := lookFrom.SubtractVector(lookAt).UnitVector()
+	u := vUp.CrossProduct(w).UnitVector()
+	v := w.CrossProduct(u)
+
+	viewportU := u.MultiplyScalar(c.ViewportWidth)
+	viewportV := v.MultiplyScalar(c.ViewportHeight)
+
+	c.LowerLeft = c.Origin.SubtractVector(viewportU.DivideScalar(2)).SubtractVector(viewportV.DivideScalar(2)).SubtractVector(w.MultiplyScalar(c.FocalLength))
+	c.Horizontal = u.MultiplyScalar(c.ViewportWidth)
+	c.Vertical = v.MultiplyScalar(c.ViewportHeight)
 
 	return c
 }

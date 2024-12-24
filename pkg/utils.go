@@ -43,3 +43,14 @@ func LinearToGamma(linear float64) float64 {
 		return 0
 	}
 }
+
+func RandomInUnitDisc() Vector {
+	var p Vector
+	for {
+		p = Vector{rand.Float64(), rand.Float64(), 0}.MultiplyScalar(2).SubtractVector(Vector{1, 1, 0})
+
+		if p.DotProduct(p) < 1.0 {
+			return p
+		}
+	}
+}
