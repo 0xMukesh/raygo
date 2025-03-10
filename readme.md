@@ -1,4 +1,4 @@
-# path-tracer
+# raygo
 
 a tiny path tracer, made using golang
 
